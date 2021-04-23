@@ -38,11 +38,45 @@ public class BusinessController {
 
 	@Autowired
 	CustomerReviewService customerReviewService;
-	
+
 	@Autowired
 	BusinessService businessService;
 
-	@ApiOperation(value = "This API retrieves the business information.", notes = "Accepts business id and returns it's information such as name,url,phone and etc.", response = Business.class, responseContainer = "Business", consumes = "application/json")
+	@ApiOperation(value = "This API retrieves businesses information.", notes = "Accepts term,location and returns businesses information such as name,url,phone and etc.", response = Business.class, responseContainer = "List", consumes = "application/json")
+	@PostMapping(value = "/search")
+	public Object getBusinesses(@RequestBody Map<String, String> requestData) {
+		String response = "";
+		String method = "getBusinesses()";
+		String term = "";
+		String location = "";
+		if (requestData != null) {
+			term = requestData.get("term");
+			location = requestData.get("location");
+		}
+		logger.debug("in : " + method + " : for the term/location : " + term + "/" + location);
+
+		try {
+			if (isFieldEmpty(term) || isFieldEmpty(location)) {
+				response = generateErrorResponse("ValidationError", "Term or Location is empty");
+			} else {
+				List<Business> business = businessService.getBusinesses(term, location);
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.setSerializationInclusion(Include.NON_NULL);
+				mapper.setSerializationInclusion(Include.NON_EMPTY);
+
+				return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(business);
+			}
+
+		} catch (Exception e) {
+			e.printStackTrace();
+			logger.error(method + ":::Unable to retrieve business reviews, reason ::: ", e);
+			response = generateErrorResponse("Error", "An error occur while retrieving businesses");
+		}
+		logger.debug("out : " + method);
+		return response;
+	}
+
+	@ApiOperation(value = "This API retrieves the business reviews.", notes = "Accepts business id and returns business reviews and it's information such as name,url,phone and etc.", response = Business.class, responseContainer = "Business", consumes = "application/json")
 	@GetMapping(value = "/reviews/{id}")
 	public Object getBusinessReviews(@PathVariable("id") String businessId) {
 		String response = "";
@@ -51,13 +85,13 @@ public class BusinessController {
 
 		try {
 			Business business = customerReviewService.getBusinessReviews(businessId);
-				if(business!=null) {
-					ObjectMapper mapper = new ObjectMapper();
-					mapper.setSerializationInclusion(Include.NON_NULL);
-					mapper.setSerializationInclusion(Include.NON_EMPTY);
+			if (business != null) {
+				ObjectMapper mapper = new ObjectMapper();
+				mapper.setSerializationInclusion(Include.NON_NULL);
+				mapper.setSerializationInclusion(Include.NON_EMPTY);
 
-					return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(business);
-				}
+				return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(business);
+			}
 			response = generateErrorResponse("ValidationError", "Business does not exists");
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -68,62 +102,27 @@ public class BusinessController {
 		return response;
 	}
 
-	@ApiOperation(value = "This API retrieves businesses information.", notes = "Accepts term,location and returns businesses information such as name,url,phone and etc.", response = Business.class, responseContainer = "List", consumes = "application/json")
-	@PostMapping(value = "/search")
-	public Object getBusinesses(@RequestBody Map<String, String> requestData) {
-		String response = "";
-		String method = "getBusinesses()";
-		String term = "";
-		String location = "";
-		if(requestData!=null) {
-			term = requestData.get("term");
-			location = requestData.get("location");
-		}
-		logger.debug("in : " + method + " : for the term/location : " + term + "/" + location);
-
-		try {
-				if(isFieldEmpty(term) || isFieldEmpty(location) ) {
-					response = generateErrorResponse("ValidationError", "Term or Location is empty");
-				}else {
-					List<Business> business = businessService.getBusinesses(term, location);
-					ObjectMapper mapper = new ObjectMapper();
-					mapper.setSerializationInclusion(Include.NON_NULL);
-					mapper.setSerializationInclusion(Include.NON_EMPTY);
-
-					return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(business);
-				}
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			logger.error(method + ":::Unable to retrieve business reviews, reason ::: ", e);
-			response = generateErrorResponse("Error", "An error occur while retrieving businesses");
-		}
-		logger.debug("out : " + method);
-		return response;
-	}
-	
-	
 	private boolean isFieldEmpty(String field) {
 		boolean res = true;
-		if(field!=null && field.length()>0) {
-			res=false;
+		if (field != null && field.length() > 0) {
+			res = false;
 		}
 		return res;
 	}
-	
+
 	private String generateErrorResponse(String type, String message) {
 		String response = "";
-		
+
 		ErrorResponse error = new ErrorResponse();
 		error.setResponseType(type);
 		error.setMessage(message);
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.setSerializationInclusion(Include.NON_NULL);
 		mapper.setSerializationInclusion(Include.NON_EMPTY);
 
 		try {
-			response =  mapper.writerWithDefaultPrettyPrinter().writeValueAsString(error);
+			response = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(error);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

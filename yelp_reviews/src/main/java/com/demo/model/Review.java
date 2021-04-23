@@ -1,5 +1,6 @@
 package com.demo.model;
 
+import com.demo.googlemodel.Emotions;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 

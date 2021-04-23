@@ -1,4 +1,4 @@
-package com.demo.model;
+package com.demo.googlemodel;
 
 public final class FeatureType {
     public static final String TYPE_UNSPECIFIED = "TYPE_UNSPECIFIED";

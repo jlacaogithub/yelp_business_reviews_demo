@@ -18,11 +18,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
 import com.demo.constant.CommonConstant;
+import com.demo.googlemodel.Emotions;
+import com.demo.googlemodel.VisionRequest;
 import com.demo.model.Business;
-import com.demo.model.Emotions;
 import com.demo.model.Location;
 import com.demo.model.Review;
-import com.demo.model.VisionRequest;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
